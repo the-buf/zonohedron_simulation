@@ -1,15 +1,14 @@
-import numpy as np
 import math as math
-from scipy.stats import *
+
+import numpy as np
+import vtk
 
 # from matplotlib.ticker import LinearLocator
 # from scipy.spatial import ConvexHull
 # from numpy.core.defchararray import array
 # from numpy.core.overrides import verify_matching_signatures
 # from numpy import diff
-from scipy.stats import *
-import vtk
-
+from scipy.stats import *  # noqa: F403
 
 Generators = [
     [7.0, 0.0, 0.0],
@@ -18,67 +17,69 @@ Generators = [
     [5.0, -1.0, 2.0],
     [0.0, -7.0, -3.0],
     # [6.0, 1.0, 8.0], [2.0, 3.0, -4.0], [1.0, 7.0, 3.0], [1.0, -2.0, -4.0], [0.0, -5.0, -1.0],
-    [16.0, -2.0, 7.0],
-    [1.0, 8.0, 2.0],
-    [5.0, 0.0, -10.0],
-    [7.0, 5.0, 1.0],
-    [1.0, 8.0, 1.0],
-    # [2.0, 4.0, -1.0], [1.0, 3.0, -3.0], [1.0, 5.0, -3.0], [6.0, 9.0, -2.0], [6.0, 10.0, 5.0],
-    [7.0, 3.0, 2.0],
-    [4.0, -5.0, 0.0],
-    [3.0, 1.0, -2.0],
-    [4.0, -1.0, 2.0],
-    [1.0, 4.0, 2.0],
-    # [1.0, -10.0, 0.0], [3.0, -1.0, -2.0], [2.0, 5.0, 2.0], [1.0, 1.0, 11.0], [2.0, -15.0, 6.0],
-    [0.0, -3.0, 4.0],
-    [1.0, 0.0, 3.0],
-    [8.0, -6.0, 7.0],
-    [0.0, -2.0, -7.0],
-    [1.0, 0.0, -8.0],
-    [0.0, 10.0, -1.0],
-    [3.0, 1.0, -3.0],
-    [0.0, 6.0, -1.0],
-    [3.0, -4.0, 6.0],
-    [3.0, 0.0, -1.0],
-    [4.0, -9.0, 2.0],
-    [8.0, -1.0, -3.0],
-    [0.0, 0.0, 1.0],
-    [0.0, 2.0, -11.0],
-    [1.0, -3.0, -1.0],
-    # [0.0, -1.0, -6.0], [4.0, 7.0, 2.0], [7.0, 10.0, -6.0], [1.0, -2.0, 5.0], [0.0, 3.0, -1.0],
-    [0.0, -1.0, 7.0],
-    [3.0, 0.0, -1.0],
-    [11.0, 1.0, -1.0],
-    [7.0, -0.0, -2.0],
-    [4.0, -8.0, -6.0],
-    [0.0, -3.0, -5.0],
-    [8.0, 0.0, -1.0],
-    [0.0, 2.0, -5.0],
-    [1.0, 0.0, -3.0],
-    [3.0, 9.0, 1.0],
-    [1.0, -5.0, 1.0],
-    [2.0, -5.0, -2.0],
-    [0.0, 1.0, -2.0],
-    [4.0, 5.0, 1.0],
-    [1.0, 1.0, 7.0],
-    # [2.0, 3.0, -8.0], [1.0, 5.0, -4.0], [0.0, -4.0, -1.0], [4.0, -6.0, -2.0], [6.0, 1.0, 2.0],
-    [0.0, 1.0, -22.0],
-    [1.0, -1.0, -5.0],
-    [1.0, -10.0, -2.0],
-    [6.0, -7.0, -1.0],
-    [0.0, 8.0, -1.0],
-    [1.0, 2.0, -6.0],
-    [0.0, -4.0, 1.0],
-    [2.0, 0.0, 3.0],
-    [3.0, 6.0, -2.0],
-    [3.0, -1.0, 2.0],
-    [8.0, -0.0, 10.0],
-    [4.0, 0.0, -6.0],
-    [2.0, -4.0, 0.0],
-    [0.0, 3.0, -3.0],
-    [2.0, -2.0, 0.0],
+    # [16.0, -2.0, 7.0],
+    # [1.0, 8.0, 2.0],
+    # [5.0, 0.0, -10.0],
+    # [7.0, 5.0, 1.0],
+    # [1.0, 8.0, 1.0],
+    # # [2.0, 4.0, -1.0], [1.0, 3.0, -3.0], [1.0, 5.0, -3.0], [6.0, 9.0, -2.0], [6.0, 10.0, 5.0],
+    # [7.0, 3.0, 2.0],
+    # [4.0, -5.0, 0.0],
+    # [3.0, 1.0, -2.0],
+    # [4.0, -1.0, 2.0],
+    # [1.0, 4.0, 2.0],
+    # # [1.0, -10.0, 0.0], [3.0, -1.0, -2.0], [2.0, 5.0, 2.0], [1.0, 1.0, 11.0], [2.0, -15.0, 6.0],
+    # [0.0, -3.0, 4.0],
+    # [1.0, 0.0, 3.0],
+    # [8.0, -6.0, 7.0],
+    # [0.0, -2.0, -7.0],
+    # [1.0, 0.0, -8.0],
+    # [0.0, 10.0, -1.0],
+    # [3.0, 1.0, -3.0],
+    # [0.0, 6.0, -1.0],
+    # [3.0, -4.0, 6.0],
+    # [3.0, 0.0, -1.0],
+    # [4.0, -9.0, 2.0],
+    # [8.0, -1.0, -3.0],
+    # [0.0, 0.0, 1.0],
+    # [0.0, 2.0, -11.0],
+    # [1.0, -3.0, -1.0],
+    # # [0.0, -1.0, -6.0], [4.0, 7.0, 2.0], [7.0, 10.0, -6.0], [1.0, -2.0, 5.0], [0.0, 3.0, -1.0],
+    # [0.0, -1.0, 7.0],
+    # [3.0, 0.0, -1.0],
+    # [11.0, 1.0, -1.0],
+    # [7.0, -0.0, -2.0],
+    # [4.0, -8.0, -6.0],
+    # [0.0, -3.0, -5.0],
+    # [8.0, 0.0, -1.0],
+    # [0.0, 2.0, -5.0],
+    # [1.0, 0.0, -3.0],
+    # [3.0, 9.0, 1.0],
+    # [1.0, -5.0, 1.0],
+    # [2.0, -5.0, -2.0],
+    # [0.0, 1.0, -2.0],
+    # [4.0, 5.0, 1.0],
+    # [1.0, 1.0, 7.0],
+    # # [2.0, 3.0, -8.0], [1.0, 5.0, -4.0], [0.0, -4.0, -1.0], [4.0, -6.0, -2.0], [6.0, 1.0, 2.0],
+    # [0.0, 1.0, -22.0],
+    # [1.0, -1.0, -5.0],
+    # [1.0, -10.0, -2.0],
+    # [6.0, -7.0, -1.0],
+    # [0.0, 8.0, -1.0],
+    # [1.0, 2.0, -6.0],
+    # [0.0, -4.0, 1.0],
+    # [2.0, 0.0, 3.0],
+    # [3.0, 6.0, -2.0],
+    # [3.0, -1.0, 2.0],
+    # [8.0, -0.0, 10.0],
+    # [4.0, 0.0, -6.0],
+    # [2.0, -4.0, 0.0],
+    # [0.0, 3.0, -3.0],
+    # [2.0, -2.0, 0.0],
 ]
 # Generators = [[abs(i) for i in g ] for g in Generators]
+
+print_flag = True
 
 
 def main():
@@ -111,7 +112,7 @@ def main():
     renderWindowInteractor.Start()
 
 
-def MakeZonoheddron():
+def MakeZonoheddron() -> vtk.vtkPolyhedron:
     aZonohedron = vtk.vtkPolyhedron()
     pts, Faces = ListVertices()
     pts = np.array(pts)
@@ -160,6 +161,7 @@ def ListVertices():
     bary1 = np.sum(np.array(Generators), axis=0) / 2
     if True:
         print("Barycentre", bary, "\n")
+
     # liste des faces
     PlanesTangents = []
 
@@ -182,14 +184,13 @@ def ListVertices():
             PlanesTangents = InsertElement(PlanesTangents, L_vect)
     # Listes de plans -> faces, points ___en O(nb_plans_tangents)
     Faces = []
-    flag = False
-    if flag:
+    if print_flag:
         for p in PlanesTangents[:20]:
             print("\n", "PlansTangents", p, "\n")
 
     # Liste de vertex en frontières, c'est un cycle, des points qui sont la frontière.
     Vertices = MakeFirstZonogone(PlanesTangents[0], [0, 0, 0])
-    if flag:
+    if print_flag:
         print(
             "Element",
             PlanesTangents[0],
@@ -253,7 +254,7 @@ def ListVertices():
         # ici jusqu'a maintenant on est à peu près sûr d'avoir le bon point de départ.
         i_ngbr1 = (v_ind + 1) % len(Frontiere)
         i_ngbr2 = (v_ind - 1) % len(Frontiere)
-        if False:
+        if print_flag:
             print(
                 "\n",
                 v,
@@ -373,7 +374,7 @@ def ListVertices():
                     np.array(bary - np.array(Frontiere[i_ngbr2])), Element[1]
                 )
 
-        if False:
+        if print_flag:
             print(
                 "Faces adjacentes",
                 Faces_adja,
@@ -426,7 +427,7 @@ def ListVertices():
             flag_first_zono = True
         else:
             vv = MakeZonogone(Element, v, v_ngb)
-        if True:
+        if print_flag:
             print(
                 "point de départ",
                 v,
@@ -528,7 +529,7 @@ def MakeZonogone(Element, pt1, pt2):
     direction_perpendic = (
         np.vdot(direction, vector) / (np.sum(direction**2)) * direction - vector
     )
-    if False:
+    if print_flag:
         print(
             "\n Les deux points",
             pt1,

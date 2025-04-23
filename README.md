@@ -1,4 +1,4 @@
-## 1. 🔧 **Install pre-commit**
+## 🔧 1. **Install pre-commit**
 
 In your terminal:
 
@@ -11,9 +11,8 @@ Then in your repo root:
 ```bash
 pre-commit install
 ```
+
 This installs the Git hook so it runs automatically before every commit.
-
-
 
 ---
 
@@ -41,5 +40,7 @@ You don’t need a full-blown website, but some docs help:
 Include a `tests/` directory. Even a few basic unit tests can go a long way in showing that the code works.
 
 Use:
+
 ```bash
 pytest tests/
+```

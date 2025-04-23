@@ -79,6 +79,7 @@ def gene_A(x, m):
 
 # Liste des générateurs primitifs   ######## Calcul fait dans un csv (en n^3)
 
+
 liste_gene = [0]
 with open("/home/theo/Documents/coding/these/nb_gene_primitifs.csv", "r") as file:
     reader = csv.reader(file)
@@ -164,7 +165,7 @@ def generateur_zonogone():
             a = stat.poisson.rvs(mu=A[i][len(A[i]) - 1] / i, size=1)[0]
             # print('le poisson donne', a)
         for alpha in range(1, a + 1):
-            print("et de ", alpha)
+            # print ('et de ', alpha)
             p, q = generateur_primitif(i)
             longueur = longueur + abs(p) * i + abs(q) * i
             # print(p, q)

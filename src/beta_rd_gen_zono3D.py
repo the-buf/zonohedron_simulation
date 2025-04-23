@@ -2,13 +2,14 @@
 
 #   #   #   #   Intro   #   #   #   #
 ###Pour installer des packages pour Python3, utiliser pip3.
-import numpy as np
+import csv
 import math as math
 import random as rd
-import scipy.stats as stt
 import time
+
+import numpy as np
 import plotly.figure_factory as ff
-import csv
+import scipy.stats as stat
 
 zeta_3 = 1.2020569031595942853997381615
 zeta_2 = math.pi**2 / 6
@@ -229,11 +230,11 @@ def generateur_zonogone():
     # print('K = ', k)
     for i in range(1, k + 1):
         print("etape n ", i)
-        a = stt.poisson.rvs(mu=A[i][len(A[i]) - 1] / i, size=1)[0]
+        a = stat.poisson.rvs(mu=A[i][len(A[i]) - 1] / i, size=1)[0]
         # print('le poisson donne', a)
         if a != 0:
             for alpha in range(1, a + 1):
-                # print ('et de ', alpha)
+                print("et de ", alpha)
                 p, q, r = generateur_primitif(i)
                 longueur = longueur + abs(p) * i + abs(q) * i + abs(r) * i
                 # print(p, q, r)
@@ -260,7 +261,7 @@ liste_Generateurs = []
 for i in range(nombre):
     x, longueur = generateur_zonogone()
     liste_Generateurs = liste_Generateurs + x
-    print(x, longueur)
+    print(x, longueur, i)
     moyenne += longueur / nombre
 
 ### Ploting the distribution of generators' length.

@@ -30,6 +30,7 @@ lint.select = ["E", "F", "B"]
 lint.ignore = [
     "E501",
 ]
+fix = true
 
 [tool.pytest.ini_options]
 minversion = "6.0"

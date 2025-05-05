@@ -2,10 +2,11 @@ import math
 from typing import Any
 
 import numpy as np
+from numpy.typing import NDArray
 
 
 class Vector:
-    coord: np.array[int]
+    coord: NDArray[np.int_]
     dim: int
     primitive: bool = False
 
@@ -14,7 +15,7 @@ class Vector:
         self.dim = len(coord)
         self.primitive = math.gcd(*coord) == 1
 
-    def __call__(self, *args: Any, **kwargs: Any) -> np.array[int]:
+    def __call__(self, *args: Any, **kwargs: Any) -> NDArray[int]:
         """Calls the generators, receive the coordinates."""
         return self.coord
 
@@ -22,9 +23,15 @@ class Vector:
         scal = np.cross(self.coord, other.coord)
         return scal.tolist() == [0] * self.dim
 
+    def add(self, other: "Vector") -> "Vector":
+        self.coord += other.coord
+        self.primitive = math.gcd(*self.coord) == 1
+        return self
+
 
 class Cone:
     dim: int
+    direction: Vector
     tangent_planes_vect: list[Vector]  # normal vectors to tangent planes
     origin: Vector
 
@@ -34,6 +41,7 @@ class Cone:
         if origin is None:
             origin = Vector([0, 0, 0])
         self.origin = origin
+        self.direction = Vector(list(-np.sum([v.coord for v in vectors], axis=0)))
 
     def contain_signed_vectors(self, vectors: list[Vector]) -> bool:
         vectors_array = np.stack([v.coord for v in vectors])

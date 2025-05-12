@@ -20,22 +20,36 @@ def test_create_faces_plane() -> None:
     assert True
 
 
-def test_ordering_generators() -> None:
-    origin = Vector([0, 0, 0])
-    generators = [Vector([0, 0, -1]), Vector([0, -1, 0]), Vector([-1, 0, 0])]
-    cone = Cone(generators, origin, dim=3)
-    vectors = [Vector([0, 1, 1]), Vector([0, 0, 1]), Vector([1, 1, 1])]
-    assert ordering_generators(vectors, cone) == [
-        vectors[1],
-        vectors[0],
-        vectors[2],
-    ]
+class TestVisualisationZonotopes:
+    def setup_method(self):
+        self.cone = Cone(
+            vectors=[Vector([0, 0, -1]), Vector([0, -1, 0]), Vector([-1, 0, 0])],
+            origin=Vector([0, 0, 0]),
+            dim=3,
+        )
 
-    # test colinearity
-    vectors.append(Vector([0, 5, 5]))
-    sorted_vectors = ordering_generators(vectors, cone)
-    assert sorted_vectors == [
-        vectors[1],
-        Vector([0, 6, 6]),
-        vectors[2],
-    ]
+    def test_ordering_generators(self) -> None:
+        vectors = [Vector([0, 1, 1]), Vector([0, 0, 1]), Vector([1, 1, 1])]
+        assert ordering_generators(vectors, self.cone) == [
+            vectors[1],
+            vectors[0],
+            vectors[2],
+        ]
+
+        # Here is the test for merging vector when there is colinearity
+        vectors.append(Vector([0, 5, 5]))
+        sorted_vectors = ordering_generators(vectors, self.cone)
+        assert sorted_vectors == [
+            vectors[1],
+            Vector([0, 6, 6]),
+            vectors[2],
+        ]
+
+    def test_multiple_colinear_vector_ordering(self) -> None:
+        vectors = [
+            Vector([1, 0, 1]),
+            Vector([1, 0, 1]),
+            Vector([1, 0, 1]),
+            Vector([1, 0, 1]),
+        ]
+        assert ordering_generators(vectors, self.cone) == [Vector([4, 0, 4])]

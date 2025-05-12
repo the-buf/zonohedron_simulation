@@ -19,6 +19,9 @@ class Vector:
         """Calls the generators, receive the coordinates."""
         return self.coord
 
+    def __eq__(self, other: "Vector"):
+        return np.array_equal(self.coord, other.coord) and (self.dim == other.dim)
+
     def is_primitive_with(self, other: "Vector") -> bool:
         scal = np.cross(self.coord, other.coord)
         return scal.tolist() == [0] * self.dim

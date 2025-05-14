@@ -129,6 +129,7 @@ def MakeZonoheddron() -> vtk.vtkPolyhedron:
         for i in f:
             faces.append(i)
 
+    print("faces ", faces)
     aZonohedron.SetFaces(faces)
     aZonohedron.Initialize()
 

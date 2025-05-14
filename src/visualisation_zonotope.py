@@ -1,67 +1,81 @@
+import logging
+
 import numpy as np
 import vtk
 
+from tests.temp import MakeZonoheddron
 from type import Cone, Vector
+from visualisation_utils import (
+    create_faces,
+    create_faces_plane_from_generators,
+    ordering_generators,
+)
+
+logger = logging.getLogger(__name__)
 
 
-def zonotope_from_generator(generator: list[Vector]) -> vtk.vtkPolyhedron:
+def main():
+    colors = vtk.vtkNamedColors()
+
+    zonohedron = MakeZonoheddron()
+    # Visualize
+    mapper = vtk.vtkPolyDataMapper()
+    mapper.SetInputData(zonohedron.GetPolyData())
+
+    actor = vtk.vtkActor()
+    actor.SetMapper(mapper)
+    actor.GetProperty().SetColor(colors.GetColor3d("PaleGoldenrod"))
+
+    renderer = vtk.vtkRenderer()
+    renderWindow = vtk.vtkRenderWindow()
+    renderWindow.SetWindowName("Zonohedron")
+    renderWindow.AddRenderer(renderer)
+    renderWindowInteractor = vtk.vtkRenderWindowInteractor()
+    renderWindowInteractor.SetRenderWindow(renderWindow)
+
+    renderer.AddActor(actor)
+    renderer.SetBackground(colors.GetColor3d("CadetBlue"))
+    renderer.GetActiveCamera().Azimuth(30)
+    renderer.GetActiveCamera().Elevation(30)
+
+    renderer.ResetCamera()
+
+    renderWindow.Render()
+    renderWindowInteractor.Start()
+
+
+def zonotope_from_generators(generators: list[Vector], cone: Cone) -> vtk.vtkPolyhedron:
+    # Clean the generators set
+    ordered_generators = ordering_generators(generators, cone)
+
+    # List the faces of the polytope with the generators associated
+    end_point = Vector(
+        (np.sum(np.array([g.coord for g in ordered_generators]), axis=0) - cone.origin)
+    )
+    faces_plans = create_faces_plane_from_generators(ordered_generators, end_point)
+
+    # Build the zonotope
     zonotope = vtk.vtkPolyhedron()
-    return zonotope
+    vertices = []
+    faces = []
+    border = []
+    for plan in faces_plans:
+        create_faces(border, plan)
 
-
-def faces_plane_from_generators(generators: list[Vector]) -> list[list[int]]:
-    return
-
-
-def ordering_generators(generators: list[Vector], cone: Cone) -> list[Vector]:
-    """We re-order the list of Vectors in order to process them later, and to aggregate
-    colinear vectors pairwise.
-
-    Args:
-        generators (list[Vector]): list of the generators of the futur zonotope
-        cone (Cone): The cone from which we are generating the zonotopes
-
-    Returns:
-        list[Vector]: re-ordered list of vectors of the zonotope.
-    """
-    vectors_sorted = [
-        [
-            ((v.coord - cone.origin.coord) / (np.linalg.norm(v.coord))).dot(
-                cone.direction.coord
-            ),
-            v,
-        ]
-        for v in generators
-    ]
-    vectors_sorted = sorted(vectors_sorted, key=lambda v: v[0])
-    colinear_test = 0
-    # colinear_test runs through all values except the last one
-    while colinear_test < len(vectors_sorted) - 1:
-        print(
-            colinear_test,
-            vectors_sorted[colinear_test][1].coord,
-            vectors_sorted[colinear_test + 1][1].coord,
+    # initialize the zonotope
+    for i in range(len(vertices)):
+        zonotope.GetPointIds().InsertNextId(i)
+        zonotope.GetPoints().InsertNextPoint(
+            vertices[i][0], vertices[i][1], vertices[i][2]
         )
-        if (
-            vectors_sorted[colinear_test][0] == vectors_sorted[colinear_test + 1][0]
-        ) and (
-            np.array_equal(
-                np.cross(
-                    vectors_sorted[colinear_test][1].coord,
-                    vectors_sorted[colinear_test + 1][1].coord,
-                ),
-                np.array([0, 0, 0]),  # the vectors are colinear
-            )
-        ):
-            print("is colinear")
-            new_vector = vectors_sorted[colinear_test][1].add(
-                vectors_sorted[colinear_test + 1][1]
-            )
-            vectors_sorted[colinear_test][1] = new_vector
-            vectors_sorted.pop(colinear_test + 1)
-            print(len(vectors_sorted))
-        else:
-            colinear_test += 1
-            print(len(vectors_sorted))
 
-    return [vector[1] for vector in vectors_sorted]
+    summary_faces = [len(vertices)]
+    for f in faces:
+        summary_faces.append(len(f))
+        for i in f:
+            summary_faces.append(i)
+
+    zonotope.SetFaces(summary_faces)
+    zonotope.Initialize()
+
+    return zonotope

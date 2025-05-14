@@ -13,9 +13,9 @@ class Vector:
     def __init__(self, coord: list[int]):
         self.coord = np.array(coord)
         self.dim = len(coord)
-        self.primitive = math.gcd(*coord) == 1
+        self.primitive = math.gcd(*map(int, coord)) == 1
 
-    def __call__(self, *args: Any, **kwargs: Any) -> NDArray[int]:
+    def __call__(self, *args: Any, **kwargs: Any) -> NDArray[np.int_]:
         """Calls the generators, receive the coordinates."""
         return self.coord
 

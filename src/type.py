@@ -1,5 +1,4 @@
 import math
-from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -15,9 +14,8 @@ class Vector:
         self.dim = len(coord)
         self.primitive = math.gcd(*map(int, coord)) == 1
 
-    def __call__(self, *args: Any, **kwargs: Any) -> NDArray[np.int_]:
-        """Calls the generators, receive the coordinates."""
-        return self.coord
+    def __repr__(self):
+        return f"Vector({self.coord})"
 
     def __eq__(self, other: "Vector"):
         return np.array_equal(self.coord, other.coord) and (self.dim == other.dim)
@@ -26,10 +24,18 @@ class Vector:
         scal = np.cross(self.coord, other.coord)
         return scal.tolist() == [0] * self.dim
 
-    def add(self, other: "Vector") -> "Vector":
-        self.coord += other.coord
-        self.primitive = math.gcd(*self.coord) == 1
-        return self
+    def __add__(self, other: "Vector") -> "Vector":
+        if self.dim != other.dim:
+            raise ValueError("Vectors must have the same dimensions for addition.")
+        return Vector(self.coord + other.coord)
+
+    def __sub__(self, other: "Vector") -> "Vector":
+        if self.dim != other.dim:
+            raise ValueError("Vectors must have the same dimensions for subtraction.")
+        return Vector(self.coord - other.coord)
+
+    def __neg__(self):
+        return Vector(-self.coord)
 
 
 class Cone:

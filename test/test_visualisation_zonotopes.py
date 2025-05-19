@@ -1,8 +1,10 @@
 from type import Cone, Vector
 from visualisation_utils import (
     create_faces_plane_from_generators,
+    create_zonogon,
     match_border_segments,
     ordering_generators,
+    update_border,
 )
 from visualisation_zonotope import zonotope_from_generators
 
@@ -81,20 +83,136 @@ class TestVisualisationZonotopes:
 
     def test_match_border(self) -> None:
         # generators = [Vector([0, 1, 0]), Vector([1, 1, 0]), Vector([0, 0, 1])]
+        # Test 1 segment in common
+        end_point = Vector([1, 2, 1])
+        border = [
+            self.cone.origin,
+            Vector([0, 1, 0]),
+            Vector([1, 2, 0]),
+            Vector([1, 1, 0]),
+        ]
+        plan = [Vector([1, 0, 0]), Vector([0, 1, 0]), Vector([0, 0, 1])]
+        assert match_border_segments(border, plan, end_point) == 0
+
+        # Test 2 segments in common
+        border = (
+            border[:1]
+            + [
+                Vector([0, 0, 1]),
+                Vector([0, 1, 1]),
+            ]
+            + border[1:]
+        )
+        plan = [Vector([1, -1, 0]), Vector([1, 1, 0]), Vector([0, 0, 1])]
+        assert match_border_segments(border, plan, end_point) == 3
+
+    def test_match_reverse_border(self) -> None:
+        # generators = [Vector([0, 1, 0]), Vector([1, 1, 0]), Vector([0, 0, 1])]
+        # Test 1 segment in common
+        end_point = Vector([1, 2, 1])
+        border = [
+            Vector([1, 1, 0]),
+            Vector([1, 2, 0]),
+            Vector([0, 1, 0]),
+            self.cone.origin,
+        ]
+        plan = [Vector([1, 0, 0]), Vector([0, 1, 0]), Vector([0, 0, 1])]
+        assert match_border_segments(border, plan, end_point) in [-1, 3]
+
+        # Test 2 segments in common
+        border = (
+            border[:3]
+            + [
+                Vector([0, 0, 1]),
+                Vector([0, 1, 1]),
+            ]
+            + border[3:]
+        )
+        plan = [Vector([1, -1, 0]), Vector([1, 1, 0]), Vector([0, 0, 1])]
+        assert match_border_segments(border, plan, end_point) == 2
+
+    def test_one_point_match_border(self) -> None:
+        # Is this can happen in this situation ?
+        # TODO later
+        assert True
+
+    def test_create_zonogon(self) -> None:
+        # with 2 generators
+        origin_point = Vector([1, 1, 1])
+        plan = [Vector([1, 0, 0]), Vector([0, 1, 0]), Vector([0, 0, 1])]
+        generator = plan[1]
+        zonogon = [
+            Vector([1, 1, 1]),
+            Vector([1, 2, 1]),
+            Vector([1, 2, 2]),
+            Vector([1, 1, 2]),
+        ]
+        assert create_zonogon(plan, origin_point, generator) == zonogon
+        # with 4 generators
+        origin_point = Vector([2, 5, 4])
+        plan = [
+            Vector([1, 0, 0]),
+            Vector([0, 1, 0]),
+            Vector([0, 0, 1]),
+            Vector([0, 2, 1]),
+            Vector([0, 2, 2]),
+        ]
+        generator = Vector([0, 1, 0])
+        zonogon = [
+            origin_point + v
+            for v in [
+                Vector([0, 0, 0]),
+                Vector([0, 1, 0]),
+                Vector([0, 3, 1]),
+                Vector([0, 5, 3]),
+                Vector([0, 5, 4]),
+                Vector([0, 4, 4]),
+                Vector([0, 2, 3]),
+                Vector([0, 0, 1]),
+            ]
+        ]
+        assert create_zonogon(plan, origin_point, generator) == zonogon
+
+    def test_update_border(self) -> None:
         border = [
             Vector([0, 0, 0]),
+            Vector([0, 1, 0]),
+            Vector([0, 1, 1]),
+            Vector([0, 0, 1]),
+        ]
+        zonogon = [
+            Vector([0, 0, 0]),
+            Vector([1, 0, 0]),
+            Vector([1, 1, 0]),
+            Vector([0, 1, 0]),
+        ]
+        origin_index = 0
+        assert update_border(border, zonogon, origin_index)[0] == zonogon + border[2:]
+        # with one point removed
+        border = [
+            Vector([0, 0, 0]),
+            Vector([1, 0, 0]),
+            Vector([1, 1, 0]),
             Vector([0, 1, 0]),
             Vector([0, 2, 1]),
             Vector([0, 1, 1]),
         ]
-        plan = []
+        zonogon = [
+            Vector([0, 1, 0]),
+            Vector([0, 2, 1]),
+            Vector([1, 2, 1]),
+            Vector([1, 1, 0]),
+        ]
+        origin_index = 3
+        assert (
+            update_border(border, zonogon, origin_index)[0]
+            == border[:3] + [Vector([1, 2, 1])] + border[4:]
+        )
 
+    def test_update_border_reverse(self) -> None:
+        # TODO
         assert True
-        border = []
 
+    def test_create_face(self) -> None:
+        # TODO
         assert True
-
-    def one_point_match_border(self) -> None:
-        border = []
-        plan = []
-        assert match_border_segments(border, plan)

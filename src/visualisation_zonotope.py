@@ -3,11 +3,12 @@ import logging
 import numpy as np
 import vtk
 
-from tests.temp import MakeZonoheddron
+from temp import Generators
 from type import Cone, Vector
 from visualisation_utils import (
     create_faces,
     create_faces_plane_from_generators,
+    create_zonogon,
     ordering_generators,
 )
 
@@ -15,10 +16,16 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    colors = vtk.vtkNamedColors()
+    cone = Cone(
+        vectors=[Vector([0, 0, -1]), Vector([0, -1, 0]), Vector([-1, 0, 0])],
+        origin=Vector([0, 0, 0]),
+        dim=3,
+    )
+    generators = [Vector(g) for g in Generators]  # to be updated
+    zonohedron = zonotope_from_generators(generators, cone)
 
-    zonohedron = MakeZonoheddron()
     # Visualize
+    colors = vtk.vtkNamedColors()
     mapper = vtk.vtkPolyDataMapper()
     mapper.SetInputData(zonohedron.GetPolyData())
 
@@ -50,17 +57,27 @@ def zonotope_from_generators(generators: list[Vector], cone: Cone) -> vtk.vtkPol
 
     # List the faces of the polytope with the generators associated
     end_point = Vector(
-        (np.sum(np.array([g.coord for g in ordered_generators]), axis=0) - cone.origin)
+        (
+            np.sum(np.array([g.coord for g in ordered_generators]), axis=0)
+            - cone.origin.coord
+        )
     )
     faces_plans = create_faces_plane_from_generators(ordered_generators, end_point)
+    keys = sorted(faces_plans.keys())
+    first_plan = faces_plans[keys[0]].pop(0)
 
     # Build the zonotope
     zonotope = vtk.vtkPolyhedron()
-    vertices = []
-    faces = []
-    border = []
-    for plan in faces_plans:
-        create_faces(border, plan)
+    vertices = create_zonogon(first_plan, cone.origin, first_plan[1])
+    faces = [vertices]
+    border = vertices.copy()
+
+    for k in keys:
+        for plan in faces_plans[k]:
+            vertices, face, border = create_faces(border, plan, end_point, vertices)
+            faces.append(face)
+
+    # TODO the central symetry
 
     # initialize the zonotope
     for i in range(len(vertices)):
@@ -79,3 +96,7 @@ def zonotope_from_generators(generators: list[Vector], cone: Cone) -> vtk.vtkPol
     zonotope.Initialize()
 
     return zonotope
+
+
+if __name__ == "__main__":
+    main()

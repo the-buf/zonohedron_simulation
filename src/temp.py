@@ -13,9 +13,9 @@ from scipy.stats import *  # noqa: F403
 Generators = [
     [7.0, 0.0, 0.0],
     [0.0, 1.0, 0.0],
-    [10.0, -1.0, -9.0],
-    [5.0, -1.0, 2.0],
-    [0.0, -7.0, -3.0],
+    [10.0, 1.0, 9.0],
+    [5.0, 1.0, 2.0],
+    [0.0, 7.0, 3.0],
     # [6.0, 1.0, 8.0], [2.0, 3.0, -4.0], [1.0, 7.0, 3.0], [1.0, -2.0, -4.0], [0.0, -5.0, -1.0],
     # [16.0, -2.0, 7.0],
     # [1.0, 8.0, 2.0],
@@ -204,7 +204,7 @@ def ListVertices():
     Frontiere = Vertices
     Faces.append([i for i in range(len(Frontiere))])
     translation_bary = []
-    for Element in PlanesTangents[1 : len(PlanesTangents) - 859]:  #
+    for Element in PlanesTangents[1:]:  #
         for v_f in range(len(Frontiere) - 1):
             if np.vdot(
                 np.array(bary - np.array(Frontiere[v_f + 1])), Element[1]
@@ -274,22 +274,22 @@ def ListVertices():
         val2 = np.vdot(np.array(bary - np.array(Frontiere[i_ngbr2])), Element[1])
 
         # On choisi le voisin pour faire ensuite le zonotope
-        if abs(val1 - valeur) < 0.00001:
+        if np.allclose(val1, valeur):
             v_ngb = Frontiere[i_ngbr1]
-        elif (
-            abs(val2 - valeur) < 0.00001
+        elif np.allclose(
+            val2, valeur
         ):  # Si il n'y a pas de valeurs suivante, c'est que celui d'avant est le bon voisin pour
             v_ngb = Frontiere[i_ngbr2]
         else:
             v_ngb = v
 
         # si il n'y a aucun cote en commun, il faut les faces adjacentes qui ont ce sommet
-        if abs(val1 - valeur) >= 0.00001 and abs(val2 - valeur) >= 0.00001:
+        if not np.allclose(val1, valeur) and not np.allclose(val2, valeur):
             for f in Faces:
                 if Vertices.index(v) in f:
                     Faces_adja.append(f)
-        while abs(val1 - valeur) < 0.00001 or abs(val2 - valeur) < 0.00001:
-            if abs(val1 - valeur) < 0.00001:
+        while np.allclose(val1, valeur) or np.allclose(val2, valeur):
+            if np.allclose(val1, valeur):
                 if (
                     np.array(Frontiere[i_ngbr1])
                     - np.array(Frontiere[(i_ngbr1 - 1) % len(Frontiere)])
@@ -334,7 +334,7 @@ def ListVertices():
                 val1 = np.vdot(
                     np.array(bary - np.array(Frontiere[i_ngbr1])), Element[1]
                 )
-            if abs(val2 - valeur) < 0.00001:
+            if np.allclose(val2, valeur):
                 inter_val = np.array(Frontiere[i_ngbr2]) - np.array(
                     Frontiere[(i_ngbr2 + 1) % len(Frontiere)]
                 )
